@@ -48,7 +48,7 @@ params = {
     "facets[series][]": "RWTC",    # RWTC = WTI crude, Cushing OK
     "sort[0][column]": "period",   # sort by date...
     "sort[0][direction]": "desc",  # ...newest first
-    "length": 10,                  # just the 10 most recent weeks
+    "length": 5,                  # just the 10 most recent weeks
 }
 
 # --- Step 3: make the request ----------------------------------------------
