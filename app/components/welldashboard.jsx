@@ -20,11 +20,12 @@ const CONFIG = {
   discountAnnual: 0.10, galPerBbl: 42, mcfPerBoe: 6,
 };
 
-/* Supabase (reads your live tables). Env vars must be NEXT_PUBLIC_ prefixed. */
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-  process.env.NEXT_PUBLIC_SUPABASE_KEY || ""
-);
+/* Supabase (reads your live tables). Env vars must be NEXT_PUBLIC_ prefixed.
+   Created lazily and only when both vars exist, so a missing var degrades to
+   "manual price" mode instead of crashing the build. */
+const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPA_KEY = process.env.NEXT_PUBLIC_SUPABASE_KEY;
+const supabase = (SUPA_URL && SUPA_KEY) ? createClient(SUPA_URL, SUPA_KEY) : null;
 
 /* ============================================================================
    THE MODEL — same math as type_curve.py + cash_flow.py, in JS.
@@ -131,6 +132,7 @@ export default function WellDashboard() {
   // pull the latest real WTI price from Supabase on load
   useEffect(() => {
     async function load() {
+      if (!supabase) { setStatus("offline"); return; }
       try {
         const { data, error } = await supabase
           .from("oil_prices").select("date, price").order("date", { ascending: false }).limit(1);
